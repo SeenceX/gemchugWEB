@@ -1,0 +1,36 @@
+.nav-link:hover{
+    color: #F60 !important;
+}
+.services{
+    width: 600px;
+}
+.carousel-inner>.carousel-item.active>img{
+    transition: color .3s ease-in;
+}
+.carousel-inner:hover>.carousel-item.active>img{
+    filter: blur(4px);
+    filter: brightness(50%);
+}
+.carousel-inner:hover{
+    cursor: pointer;
+}
+#clock{
+    fill: rgba(38, 187, 157);
+    width: 56px;
+    height: 56px;
+}
+.aside-item{
+    border-radius: 3px;
+    transition: .3s ease-in;
+}
+.aside-item:hover{
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.7);
+
+}
+.aside-link:hover{
+    color: #000000 !important;
+}
+ .modal-dialog{
+     max-width: 640px !important;
+ }
