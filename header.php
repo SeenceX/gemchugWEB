@@ -10,6 +10,13 @@ $db = $database->getConnection();
 
 $user = new User($db);
 
+if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time()){
+    session_unset();
+    session_destroy();
+
+    setcookie('auth_token', '', time() - 3600, '/');
+}
+
 ?>
 
     <!doctype html>
@@ -98,32 +105,7 @@ $user = new User($db);
                     <section class="row justify-content-center">
                         <section class="col-12 col-sm-8 col-md-8">
 
-                            <?php
-                            if (isset($_POST["loignIn"]) && isset($_POST["loignIn"])) {
-                                $user->login = $_POST["loignIn"];
-                                $user->password = md5($_POST["passwordIn"]);
-                                $stmt = $user->signIn();
-
-                                $num = $stmt->rowCount();
-                                if ($num > 0) {
-                                    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-                                        extract($row);
-                                        $_SESSION["user_id"] = $id;
-                                        $_SESSION["user_name"] = $fio;
-                                    }
-
-                                    echo '<script>';
-                                    echo 'alert("Авторизация успешна!")';
-                                    echo '</script>';
-                                } else {
-                                    echo '<script>';
-                                    echo 'alert("Неправильный логин или пароль")';
-                                    echo '</script>';
-                                }
-                            }
-                            ?>
-
-                            <form class="form-container" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]) ?>"
+                            <form class="form-container" action=""
                                   method="post">
                                 <div class="form-group mb-3">
                                     <h4 class="text-center font-weight-bold"> Вход </h4>
@@ -136,7 +118,7 @@ $user = new User($db);
                                     <input type="password" name="passwordIn" class="form-control" id="InputPassword1"
                                            placeholder="********">
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                                <button type="submit" onclick="submitLoginForm()" class="btn btn-primary btn-block">Войти</button>
                             </form>
                         </section>
                     </section>
@@ -155,24 +137,7 @@ $user = new User($db);
                     <section class="row justify-content-center">
                         <section class="col-12 col-sm-8 col-md-8">
 
-                            <?php
-                            if (isset($_POST["login"]) && isset($_POST["password"]) && isset($_POST["fio"])) {
-                                $user->login = $_POST["login"];
-                                $user->password = $_POST["password"];
-                                $user->fio = $_POST["fio"];
-                                if ($user->signUp()) {
-                                    echo '<script>';
-                                    echo 'alert("Регистрация успешна!!")';
-                                    echo '</script>';
-                                } else {
-                                    echo '<script>';
-                                    echo 'alert("Что-то пошло не так :(")';
-                                    echo '</script>';
-                                }
-                            }
-                            ?>
-
-                            <form class="form-container" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]) ?>"
+                            <form class="form-container" action=""
                                   method="post">
                                 <div class="form-group mb-3">
                                     <h4 class="text-center font-weight-bold"> Регистрация </h4>
