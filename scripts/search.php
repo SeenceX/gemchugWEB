@@ -1,9 +1,12 @@
 <?php
+session_start();
+$userId = $_SESSION['user_id'];
 include_once "../config/Database.php";
 include_once "../objects/Services.php";
 
 $database = new Database();
 $db = $database->getConnection();
+
 
 $text = $_POST["text"];
 

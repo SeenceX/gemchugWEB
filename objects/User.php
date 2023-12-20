@@ -14,9 +14,48 @@ class User
         $this->conn = $db;
     }
 
-    function signUp()
+    function signUp($login, $password, $fio)
     {
+        $queryCheck = "SELECT * FROM " . $this->table_users . " WHERE login = :login";
+        $stmtCheck = $this->conn->prepare($queryCheck);
 
+        if (!$stmtCheck) {
+            echo "Ошибка при подготовке запроса";
+            return false;
+        }
+
+        $stmtCheck->bindParam(':login', $login);
+        $stmtCheck->execute();
+
+        if ($stmtCheck->rowCount() > 0) {
+            return false; // Пользователь с таким логином уже существует
+        }
+
+        // хешируем пароль
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // вставляем пользователя в бд
+        $queryInsert = "INSERT INTO " . $this->table_users . " (login, password, fio, auth_token, created) VALUES (:login, :password, :fio, NULL, :now)";
+        $stmtInsert = $this->conn->prepare($queryInsert);
+
+        if (!$stmtInsert) {
+            //ошибка при подготовке запроса
+            return false;
+        }
+
+        $timestamp = date("Y-m-d H:i:s");
+
+        $stmtInsert->bindParam(':login', $login);
+        $stmtInsert->bindParam(':password', $hashedPassword);
+        $stmtInsert->bindParam(':fio', $fio);
+        $stmtInsert->bindParam(':now', $timestamp);
+
+        if ($stmtInsert->execute()) {
+            return true; // регистрация успешна
+        }
+
+        // Ошибка при выполнении запроса
+        return false; // ошибка регистрации
     }
 
     function signIn($login, $password)
@@ -27,23 +66,23 @@ class User
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if($user){
+        if ($user) {
             $hashedPassword = $user['password'];
 
-            if(password_verify($password, $hashedPassword)){
+            if (password_verify($password, $hashedPassword)) {
+                // Успешная аутентификация
 
+                // Начинаем сессию
                 session_start();
 
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['login'] = $user['login'];
                 $_SESSION['fio'] = $user['fio'];
 
-                //cookie
+                // Создаем и устанавливаем куки
                 $token = bin2hex(random_bytes(32));
+                // Установка куки с токеном
                 setcookie("auth_token", $token, time() + 3600, "/");
-
-                $userId = $user['id'];
-                $this->saveTokenDB($userId, $token);
 
                 return true; // signIn done
             }
@@ -51,12 +90,4 @@ class User
         return false; // signIn fail
     }
 
-    private function saveTokenDB($userId, $token): void
-    {
-        $query = "UPDATE ".$this->table_users." SET auth_token = :token WHERE id = :userId";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':token', $token);
-        $stmt->bindParam(':userId', $userId);
-        $stmt->execute();
-    }
 }

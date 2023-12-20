@@ -1,4 +1,4 @@
-$(document).ready(function (){
+$(document).ready(function (serviceId, userId){
     $('#getService').on("keyup", function(){
 
         var text = $(this).val();

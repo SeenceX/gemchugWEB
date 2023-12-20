@@ -42,10 +42,8 @@
     </footer>
 </div>
 
-<script src="js/bootstrap.bundle.js"></script>
-<script src="js/jquery-3.7.1.min.js"></script>
-<script src="js/liveSearch.js"></script>
-<script src="js/login.js"></script>
+
+
 </body>
 </html>
 

@@ -1,6 +1,6 @@
 <?php
-
 session_start();
+//var_dump($_SESSION);
 
 include_once "config/Database.php";
 include_once "objects/User.php";
@@ -11,11 +11,9 @@ $db = $database->getConnection();
 $user = new User($db);
 
 if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time()){
-    session_unset();
-    session_destroy();
-
-    setcookie('auth_token', '', time() - 3600, '/');
+    // Сессия не уничтожается, но можно выполнить другие действия по необходимости
 }
+
 
 ?>
 
@@ -30,12 +28,21 @@ if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time(
         <link rel="stylesheet" href="./css/bootstrap.css">
         <link rel="stylesheet" href="./css/style.css">
         <link rel="icon" href="./img/favicon.png">
+        <script src="js/bootstrap.bundle.js"></script>
+        <script src="js/jquery-3.7.1.min.js"></script>
+        <script src="js/login.js"></script>
+        <script src="js/registration.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
+        <script src="js/record.js"></script>
+        <script src="js/liveSearch.js"></script>
     </head>
 <body class="d-flex flex-column h-100">
 <header class="p-2" style="border-bottom: 1px solid rgba(38, 187, 157, 1);">
     <div class="container d-flex justify-content-between align-items-center">
         <a class="navbar-brand" href="index.php"><img src="./img/logo.svg" alt="logo"></a>
-        <div class="auth d-flex flex-md-row flex-column">
+        <div class="d-flex align-items-center">
             <?php
 
             if(!isset($_SESSION["user_id"])){
@@ -52,10 +59,23 @@ if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time(
                 Зарегистрироваться
             </button>';}
             else{
-                echo '<p>'.explode(" ", $_SESSION["user_name"])[1].'</p>';
-                echo '<form action="./scripts/clear-session.php" method="post">';
-                echo '<button type="submit" name="exit">Выйти</button>';
+                $fio = $_SESSION["fio"];
+                $fio_parts = explode(" ", $fio);
+
+                $initials = "";
+                $initials .= $fio_parts[0] . " "; // Первое слово полностью
+
+                for ($i = 1; $i < count($fio_parts); $i++) {
+                    $initials .= mb_substr($fio_parts[$i], 0, 1) . ".";
+                }
+                echo '<p class="me-3 fw-bold fs-6 text-uppercase">'.$initials.'</p>';
+                echo '<div class="d-flex align-items-center">';
+                echo '<a href="records.php" class="btn text-light me-2 px-3 align-items-center d-flex justify-content-center" style="background-color: rgba(38, 187, 157, 1); height: 32px;">Записи</a>';
+                echo '<form action="./scripts/clear-session.php" class="d-flex align-items-center" method="post">';
+                echo '<button type="submit" class="btn text-light me-2 px-2 align-items-center d-flex align-self-center justify-content-center" style="background-color: rgba(38, 187, 157, 1); height: 32px;" name="exit">Выйти</button>';
                 echo '</form>';
+                echo '</div>';
+
             }
             ?>
 
@@ -82,10 +102,10 @@ if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time(
                         <a class="nav-link text-uppercase fw-bold" href="services.php">услуги</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-uppercase fw-bold" href="discounts.html">выгодные предложения</a>
+                        <a class="nav-link text-uppercase fw-bold" href="discounts.php">выгодные предложения</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-uppercase fw-bold" href="photogallery.html">фотогалерея</a>
+                        <a class="nav-link text-uppercase fw-bold" href="photogallery.php">фотогалерея</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-uppercase fw-bold" href="contacts.php">контакты</a>
@@ -118,7 +138,7 @@ if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time(
                                     <input type="password" name="passwordIn" class="form-control" id="InputPassword1"
                                            placeholder="********">
                                 </div>
-                                <button type="submit" onclick="submitLoginForm()" class="btn btn-primary btn-block">Войти</button>
+                                <button type="button" onclick="submitLoginForm()" class="btn btn-primary btn-block">Войти</button>
                             </form>
                         </section>
                     </section>
@@ -154,7 +174,7 @@ if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time(
                                     <input type="password" name="password" class="form-control" id="InputPassword2"
                                            placeholder="********">
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+                                <button type="button" onclick="submitRegistrationForm()" class="btn btn-primary btn-block">Зарегистрироваться</button>
                             </form>
                         </section>
                     </section>
@@ -163,4 +183,4 @@ if (!isset($_COOKIE['auth_token']) || strtotime($_COOKIE['auth_token']) <= time(
         </div>
     </div>
 </div>
-<?php
+
